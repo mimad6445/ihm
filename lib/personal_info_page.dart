@@ -4,69 +4,78 @@ import 'package:flutter/material.dart';
 import 'package:ihm/main.dart';
 import 'package:image_picker/image_picker.dart';
 import 'visa_application_data.dart';
-import 'contact_info_page.dart';
 import 'package:ihm/components/day_selector.dart';
 import 'package:ihm/components/droppy.dart';
 import 'package:ihm/constants.dart';
+import 'package:ihm/personal_info_page2.dart';
 
 class PersonalInfoPage extends StatefulWidget {
   final VisaApplicationData applicationData;
   final VoidCallback onNext;
 
-  PersonalInfoPage({required this.applicationData, required this.onNext});
+  const PersonalInfoPage({super.key, required this.applicationData, required this.onNext});
 
   @override
+  // ignore: library_private_types_in_public_api
   _PersonalInfoPageState createState() => _PersonalInfoPageState();
 }
 
 class _PersonalInfoPageState extends State<PersonalInfoPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _placeOfBirthController = TextEditingController();
   final TextEditingController _dobController = TextEditingController();
-  final TextEditingController _genderController = TextEditingController();
-  final TextEditingController _nationalityController = TextEditingController();
-  String _gender = 'Male';
+  final TextEditingController _sexController = TextEditingController();
+  final TextEditingController _professionController = TextEditingController();
+  final TextEditingController _qualificationController =
+      TextEditingController();
+  final TextEditingController _placeOfIssueController = TextEditingController();
+  String _sex = 'Male';
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _firstNameController.text = widget.applicationData.firstName;
-    _lastNameController.text = widget.applicationData.lastName;
+    _fullNameController.text = widget.applicationData.fullName;
+    _placeOfBirthController.text = widget.applicationData.placeOfBirth;
     _dobController.text = widget.applicationData.dateOfBirth;
-    _gender = widget.applicationData.gender.isNotEmpty
-        ? widget.applicationData.gender
+    _sex = widget.applicationData.sex.isNotEmpty
+        ? widget.applicationData.sex
         : 'Male';
-    _nationalityController.text = widget.applicationData.nationality;
+    _professionController.text = widget.applicationData.profession;
+    _qualificationController.text = widget.applicationData.qualification;
+    _placeOfIssueController.text = widget.applicationData.placeOfIssue;
   }
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _fullNameController.dispose();
+    _placeOfBirthController.dispose();
     _dobController.dispose();
-    _nationalityController.dispose();
+    _professionController.dispose();
+    _qualificationController.dispose();
+    _placeOfIssueController.dispose();
     super.dispose();
   }
-Future<void> pickImage() async {
-  if (Platform.isAndroid || Platform.isIOS) {
-    // Use image_picker for mobile platforms
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      // Handle mobile image file
-    }
-  } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
-    // Use file_picker for desktop platforms
-    final result = await FilePicker.platform.pickFiles(type: FileType.image);
-    if (result != null) {
-      setState(() {
-        _selectedImage = File(result.files.single.path!);  // Store selected file as a File object
-      });
+
+  Future<void> pickImage() async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
+      }
+    } else if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      final result = await FilePicker.platform.pickFiles(type: FileType.image);
+      if (result != null) {
+        setState(() {
+          _selectedImage = File(result.files.single.path!);
+        });
+      }
     }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -80,14 +89,14 @@ Future<void> pickImage() async {
               child: Image.asset("assets/ver.png"),
             ),
           ),
-          Container(
+          SizedBox(
             width: MediaQuery.sizeOf(context).width * 0.65,
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
                   buildProgressIndicator(0, 4),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   GestureDetector(
                     onTap: pickImage,
                     child: CircleAvatar(
@@ -97,77 +106,106 @@ Future<void> pickImage() async {
                           ? FileImage(_selectedImage!)
                           : null,
                       child: _selectedImage == null
-                          ? Icon(Icons.add_a_photo, size: 50, color: Colors.grey)
+                          ? const Icon(Icons.add_a_photo,
+                              size: 50, color: Colors.grey)
                           : ClipRRect(
-                    borderRadius: BorderRadius.circular(30.0),  // Rounded corners
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30.0),  // Same border radius as ClipRRect
-                      ),
-                      child: Image.file(
-                        _selectedImage!,
-                        height: 150,
-                        width: 150,
-                        fit: BoxFit.cover,
-                      ),
+                              borderRadius: BorderRadius.circular(30.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30.0),
+                                ),
+                                child: Image.file(
+                                  _selectedImage!,
+                                  height: 150,
+                                  width: 150,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Text(
                     "Step 1: Personal Information",
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
                         TextFormField(
-                          controller: _firstNameController,
+                          controller: _fullNameController,
                           decoration: InputDecoration(
-                            labelText: 'First Name',
-                            border: OutlineInputBorder(),
+                            labelText: 'Full Name',
+                            border: const OutlineInputBorder(),
                             prefixIcon: Icon(Icons.person, color: primaryColor),
                           ),
                           validator: (value) =>
                               value!.isEmpty ? 'Required' : null,
                         ),
-                        SizedBox(height: 15),
+                        const SizedBox(height: 15),
                         TextFormField(
-                          controller: _lastNameController,
+                          controller: _placeOfBirthController,
                           decoration: InputDecoration(
-                            labelText: 'Last Name',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.person_outline,
-                                color: primaryColor),
+                            labelText: 'Place of Birth',
+                            border: const OutlineInputBorder(),
+                            prefixIcon:
+                                Icon(Icons.location_city, color: primaryColor),
                           ),
                           validator: (value) =>
                               value!.isEmpty ? 'Required' : null,
                         ),
-                        SizedBox(height: 15),
+                        const SizedBox(height: 15),
                         BirthdaySelectorScreen(myDobController: _dobController),
                         Dropyy(
-                          hintText: 'Gender',
-                          dropItems: ['Male', 'Female'],
-                          controller: _genderController,
+                          hintText: 'Sex',
+                          dropItems: const ['Male', 'Female'],
+                          controller: _sexController,
+                          onChanged: (value) {
+                            setState(() {
+                              _sex = value;
+                            });
+                          },
                         ),
-                        SizedBox(height: 15),
+                        const SizedBox(height: 15),
                         TextFormField(
-                          controller: _nationalityController,
+                          controller: _professionController,
                           decoration: InputDecoration(
-                            labelText: 'Nationality',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.flag, color: primaryColor),
+                            labelText: 'Profession',
+                            border: const OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.work, color: primaryColor),
                           ),
                           validator: (value) =>
                               value!.isEmpty ? 'Required' : null,
                         ),
-                        SizedBox(height: 30),
+                        const SizedBox(height: 15),
+                        TextFormField(
+                          controller: _qualificationController,
+                          decoration: InputDecoration(
+                            labelText: 'Qualification',
+                            border: const OutlineInputBorder(),
+                            prefixIcon: Icon(Icons.school, color: primaryColor),
+                          ),
+                          validator: (value) =>
+                              value!.isEmpty ? 'Required' : null,
+                        ),
+                        const SizedBox(height: 15),
+                        TextFormField(
+                          controller: _placeOfIssueController,
+                          decoration: InputDecoration(
+                            labelText: 'Place of Issue',
+                            border: const OutlineInputBorder(),
+                            prefixIcon:
+                                Icon(Icons.location_on, color: primaryColor),
+                          ),
+                          validator: (value) =>
+                              value!.isEmpty ? 'Required' : null,
+                        ),
+                        const SizedBox(height: 10),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 vertical: 16.0, horizontal: 20),
                             foregroundColor: Colors.white,
                             backgroundColor: primaryColor,
@@ -176,30 +214,34 @@ Future<void> pickImage() async {
                           ),
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              widget.applicationData.firstName =
-                                  _firstNameController.text;
-                              widget.applicationData.lastName =
-                                  _lastNameController.text;
+                              widget.applicationData.fullName =
+                                  _fullNameController.text;
+                              widget.applicationData.placeOfBirth =
+                                  _placeOfBirthController.text;
                               widget.applicationData.dateOfBirth =
                                   _dobController.text;
-                              widget.applicationData.gender = _gender;
-                              widget.applicationData.nationality =
-                                  _nationalityController.text;
+                              widget.applicationData.sex = _sex;
+                              widget.applicationData.profession =
+                                  _professionController.text;
+                              widget.applicationData.qualification =
+                                  _qualificationController.text;
+                              widget.applicationData.placeOfIssue =
+                                  _placeOfIssueController.text;
 
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ContactInfoPage(
-                                    applicationData: widget.applicationData,
-                                    onNext: () {},
-                                  ),
-                                ),
+                                    builder: (context) => PersonalDetails2Page(
+                                          applicationData:
+                                              widget.applicationData,
+                                          onNext: widget.onNext,
+                                        )),
                               );
                             }
                           },
-                          child: Text("Next",
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 18)),
+                          child: const Text("Next",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18)),
                         ),
                       ],
                     ),

@@ -16,6 +16,7 @@ class Dropyy extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _DropyyState createState() => _DropyyState();
 }
 
@@ -55,8 +56,9 @@ class _DropyyState extends State<Dropyy> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-       SizedBox(height: 15,),
+       const SizedBox(height: 15,),
         DropdownButtonFormField<String>(
+          // ignore: prefer_const_constructors
           hint: Text('Gender'),
           value: selectedValue,
           items: uniqueDropItems.map((String value) {

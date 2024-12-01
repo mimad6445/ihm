@@ -7,6 +7,7 @@ class BirthdaySelectorScreen extends StatefulWidget {
   BirthdaySelectorScreen({super.key, required myDobController});
  
   @override
+  // ignore: library_private_types_in_public_api
   _BirthdaySelectorScreenState createState() => _BirthdaySelectorScreenState();
 }
 
@@ -43,7 +44,7 @@ class _BirthdaySelectorScreenState extends State<BirthdaySelectorScreen> {
                   ? 'No date selected'
                   : '${_selectedDate!.toLocal()}'.split(' ')[0],
               prefixIcon: Icon(Icons.calendar_today,color: primaryColor,),
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
             ),
           ),
         ],
